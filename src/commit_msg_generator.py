@@ -100,7 +100,8 @@ def get_score(config: Config, diff: str, msg: str) -> float:
             'Authorization': 'Bearer ' + unused_token.pop(),
             'Content-Type': 'application/json'
         },
-        json=data)
+        json=data,
+        timeout=20,)
 
     score = find_first_number(
         response.json()['choices'][0]['message']['content'])

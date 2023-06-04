@@ -33,7 +33,10 @@ Write git commit message following these rules:
     "revise": {
         "model": "gpt-3.5-turbo",
         "threshold": 0.6,
-        "prompt": "You are a scoring machine, just output the score of the git commit message is suitable. You should only output a number from 0.0 to 10.0, without any reason."
+        "prompt": """You are a scoring machine, just output the score of
+the git commit message is suitable. You should only output a number
+from 0.0 to 10.0, without any reason.
+"""
     },
 }
 
