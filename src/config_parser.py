@@ -12,7 +12,7 @@ DEFAULT_CONFIG = {
     "interactive": True,
     "model": "gpt-3.5-turbo",
     "system_prompt":
-    """I want you to act as a commit message generator. 
+    """I want you to act as a commit message generator.
 I will provide you with the git diff, and you should generate
 an appropriate commit message using the conventional commit format.
 
@@ -30,6 +30,11 @@ Write git commit message following these rules:
     "max_tokens": 256,
     "frequency_penalty": 1.6,
     "presence_penalty": 0.1,
+    "revise": {
+        "model": "gpt-3.5-turbo",
+        "threshold": 0.6,
+        "prompt": "You are a scoring machine, just output the score of the git commit message is suitable. You should only output a number from 0.0 to 10.0, without any reason."
+    },
 }
 
 

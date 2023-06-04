@@ -54,12 +54,66 @@ class UnusedToken:
         return self.access_pool.pop(0)
 
 
+def find_first_number(string: str) -> float:
+    """
+    Find the first number in a string.
+    Split the string by space and find the first number in the list.
+    """
+    for word in string.split(' '):
+        try:
+            return float(word)
+        except ValueError:
+            pass
+    return 0.0
+
+
+def get_score(config: Config, diff: str, msg: str) -> float:
+    """
+    Get the score of the commit message.
+    """
+    unused_token = UnusedToken(config['tokens'])
+
+    message = [
+        {
+            "role": "system",
+            "content": config['revise']['prompt'],
+        },
+        {
+            "role": "user",
+            "content": "Source diff:\n" + diff + "\n\n" + "Commit message:\n" + msg,
+        },
+    ]
+
+    data = {
+        'model': config['model'],
+        'messages': message,
+        'max_tokens': 256,
+        'temperature': 1,
+        'top_p': 1.0,
+        'frequency_penalty': 0.0,
+        'presence_penalty': 0.0,
+    }
+
+    response = requests.post(
+        'https://api.openai.com/v1/chat/completions',
+        headers={
+            'Authorization': 'Bearer ' + unused_token.pop(),
+            'Content-Type': 'application/json'
+        },
+        json=data)
+
+    score = find_first_number(
+        response.json()['choices'][0]['message']['content'])
+    return score
+
+
 def generate_commit_message(
         config: Config, repo_path: str) -> Generator[str, None, None]:
     """
     Generate commit messages using the OpenAI API.
     """
     unused_token = UnusedToken(config['tokens'])
+    diff = git_diff(repo_path)
 
     message = [
         {
@@ -68,7 +122,7 @@ def generate_commit_message(
         },
         {
             "role": "user",
-            "content": git_diff(repo_path),
+            "content": diff,
         },
     ]
 
@@ -82,7 +136,7 @@ def generate_commit_message(
         'presence_penalty': config['presence_penalty'],
     }
 
-    while config['interactive'] is True:
+    while True:
         #! We don't use OpenAI Python API because we don't want to couple it with our code.
         #! For hacking purposes, we use requests library to send HTTP request to OpenAI API.
         #! We need to poll the tokens to avoid rate limit.
@@ -132,5 +186,11 @@ def generate_commit_message(
         #   }
         # }
 
+        msg = response.json()['choices'][0]['message']['content']
+        if msg == '' or config['revise']['threshold'] > get_score(
+                config, diff, msg):
+            # Regenerate the commit message if the score is lower than the
+            # threshold
+            continue
         # Yield the content of first choice
-        yield response.json()['choices'][0]['message']['content']
+        yield msg
