@@ -3,6 +3,8 @@ Main Python File
 """
 import os
 import sys
+import tempfile
+import subprocess
 from git import Repo, Actor
 
 from src.args import args
@@ -38,6 +40,19 @@ def commit_full_text_message(repo_path: str, message: str) -> str:
     ).hexsha
 
 
+def edit_message(orig: str) -> str:
+    """
+    Edit the commit message in the editor specified by the EDITOR environment variable.
+    """
+    editor = os.environ.get('EDITOR', 'vim')
+    with tempfile.NamedTemporaryFile(suffix=".tmp") as tf:
+        tf.write(orig.encode())
+        tf.flush()
+        subprocess.call([editor, tf.name])
+        tf.seek(0)
+        return tf.read().decode()
+
+
 def get_commit_message() -> str:
     """
     Generate commit messages based on the configuration and prompt the user for confirmation.
@@ -48,12 +63,18 @@ def get_commit_message() -> str:
 
     for msg in generate_commit_message(config, CURRENT_PATH):
         print(msg)
-        # Get user's input to decide whether to continue
-        # If the user is satisfied, then break the loop
-        # Otherwise, continue to generate commit message
-        if config['interactive'] and get_user_input(
-                'Is this commit message satisfactory? (Y/n)', 'Y') == 'Y':
+        if config['interactive']:
+            user_selection = get_user_input(
+                'Is this commit message satisfactory? (Y/n/e)', 'Y')
+            if user_selection == 'Y':
+                return msg
+            elif user_selection == 'n':
+                continue
+            elif user_selection == 'e':
+                return edit_message(msg)
+        else:
             return msg
+
     return ''
 
 
