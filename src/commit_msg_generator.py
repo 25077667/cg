@@ -1,17 +1,28 @@
+"""
+Commit Message Generator
+
+This module provides functionality for generating commit messages using the OpenAI API.
+"""
 from random import shuffle
-import requests
 from typing import Generator
 
+import requests
 from .config_parser import Config
 from .git_diff import git_diff
 
 
-class Unused_token:
+class UnusedToken:
+    """
+    A class for managing unused tokens for API requests.
+    """
     _instance = None
     constant_pool = tuple()
     access_pool = []
 
     def __new__(cls, string_list: list[str]):
+        """
+        Create a new instance of the class or return the existing instance if it already exists.
+        """
         # Check if the string_list is empty, then raise an error
         if len(string_list) == 0:
             raise ValueError(
@@ -20,27 +31,35 @@ class Unused_token:
                 '\t For example export GPT_TOKENS="token1,token2,token3"\n' +
                 'Or edit the config file to set the tokens.')
         if not cls._instance:
-            cls._instance = super(Unused_token, cls).__new__(cls)
-            cls._instance.constant_pool = tuple(*string_list)
-            cls._instance.access_pool = list(*cls._instance.constant_pool)
+            cls._instance = super(UnusedToken, cls).__new__(cls)
+            cls._instance.constant_pool = tuple(string_list)
+            cls._instance.access_pool = list(cls._instance.constant_pool)
             shuffle(cls._instance.access_pool)
         return cls._instance
 
     def copy_pool(self) -> None:
+        """
+        Copy the constant pool of tokens to the access pool.
+        """
         self.access_pool = list(*self.constant_pool)
 
     def pop(self) -> str:
+        """
+        Remove and return a token from the access pool.
+        If the access pool is empty, copy the pool and shuffle it.
+        """
         if len(self.access_pool) == 0:
             self.copy_pool()
             shuffle(self.access_pool)
         return self.access_pool.pop(0)
 
 
-# yield string of the commit message result
-# Keep generating until the user is satisfied
 def generate_commit_message(
         config: Config, repo_path: str) -> Generator[str, None, None]:
-    unused_token = Unused_token(config['tokens'])
+    """
+    Generate commit messages using the OpenAI API.
+    """
+    unused_token = UnusedToken(config['tokens'])
 
     message = [
         {
@@ -90,6 +109,7 @@ def generate_commit_message(
             'https://api.openai.com/v1/chat/completions',
             headers=headers,
             json=data,
+            timeout=30,
         )
 
         # Response from OpenAI API like:
@@ -112,5 +132,5 @@ def generate_commit_message(
         #   }
         # }
 
-        # Yield the first choice
-        yield response.json()['choices'][0]['text']
+        # Yield the content of first choice
+        yield response.json()['choices'][0]['message']['content']
