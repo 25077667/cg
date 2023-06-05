@@ -85,13 +85,13 @@ def get_score(config: Config, diff: str, msg: str) -> float:
     ]
 
     data = {
-        'model': config['model'],
+        'model': config['revise']['model'],
         'messages': message,
-        'max_tokens': 256,
-        'temperature': 1,
-        'top_p': 1.0,
-        'frequency_penalty': 0.0,
-        'presence_penalty': 0.0,
+        'max_tokens': config['revise']['max_tokens'],
+        'temperature': config['revise']['temperature'],
+        'top_p': config['revise']['top_p'],
+        'frequency_penalty': config['revise']['frequency_penalty'],
+        'presence_penalty': config['revise']['presence_penalty'],
     }
 
     response = requests.post(

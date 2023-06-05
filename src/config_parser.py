@@ -33,6 +33,11 @@ Write git commit message following these rules:
     "revise": {
         "model": "gpt-3.5-turbo",
         "threshold": 6.5,
+        "max_tokens": 128,
+        "temperature": 1,
+        "top_p": 1.0,
+        "frequency_penalty": 0.0,
+        "presence_penalty": 0.0,
         "prompt": """You are a scoring machine, just output the score of
 the git commit message is suitable. You should only output a number
 from 0.0 to 10.0, without any reason.
