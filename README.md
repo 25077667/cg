@@ -27,6 +27,7 @@ $ poetry run python ./main.py
 ```
 
 ## Todo:
+- [ ] Benchmark with other famous commit message generator
 - [ ] Smarter prompt for commit message
 - [ ] Binary for Windows, Linux, and Mac
 - [ ] Tests and CI
