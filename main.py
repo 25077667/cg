@@ -49,8 +49,10 @@ def edit_message(orig: str) -> str:
         temp_file.write(orig.encode())
         temp_file.flush()
         subprocess.call([editor, temp_file.name])
+
         temp_file.seek(0)
-        return temp_file.read().decode()
+        result = open(temp_file.name, 'r', encoding='utf-8').read()
+        return result
 
 
 def get_commit_message() -> str:
@@ -65,7 +67,7 @@ def get_commit_message() -> str:
         print(msg)
         if config['interactive']:
             user_selection = get_user_input(
-                'Is this commit message satisfactory? (Y/n/e)', 'Y')
+                'Is this commit message satisfactory? (Y/n/e) ', 'Y')
             if user_selection == 'Y':
                 return msg
             if user_selection == 'n':

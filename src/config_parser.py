@@ -32,7 +32,7 @@ Write git commit message following these rules:
     "presence_penalty": 0.1,
     "revise": {
         "model": "gpt-3.5-turbo",
-        "threshold": 0.6,
+        "threshold": 6.5,
         "prompt": """You are a scoring machine, just output the score of
 the git commit message is suitable. You should only output a number
 from 0.0 to 10.0, without any reason.
