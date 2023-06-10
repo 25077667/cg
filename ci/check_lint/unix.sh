@@ -11,7 +11,9 @@ python_files=$(find . -name "*.py" | tr '\n' ' ')
 poetry run python -m pylint --output-format=parseable --reports=no $python_files > pylint.out || true
 
 # check pylint score
-score=$(grep -oP '(?<=^Your\ code\ has\ been\ rated\ at\ )[0-9\.]+' pylint.out)
+# Due to the macOS doesn't support -P flag, we need to use grep to get the score
+# We revise the regex from Perl into extended regex
+score=$(grep -oE '(?<=^Your\ code\ has\ been\ rated\ at\ )[0-9\.]+' pylint.out)
 
 if (( $(echo "$score < $LINT_THRESHOLD" | bc -l) )); then
     echo "Pylint score is $score, which is below the threshold of $LINT_THRESHOLD"
