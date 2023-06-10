@@ -2,10 +2,12 @@
 
 # Set options for nuitka on powershell
 
-OPTIONS="--standalone --onefile"
-SRC="main.py"
-OUT="cg.exe"
+$OPTIONS = "--standalone --onefile --assume-yes-for-downloads"
+$SRC = "main.py"
+$OUT = "cg.exe"
 
 function build_nuitka() {
-    poetry run python -m nuitka $OPTIONS $SRC -o $OUT
+    Invoke-Expression "poetry run python -m nuitka $OPTIONS $SRC -o $OUT"
 }
+
+build_nuitka
