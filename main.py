@@ -51,8 +51,9 @@ def edit_message(orig: str) -> str:
         subprocess.call([editor, temp_file.name])
 
         temp_file.seek(0)
-        result = open(temp_file.name, 'r', encoding='utf-8').read()
-        return result
+        # With open it and read it for result returning
+        with open(temp_file.name, 'r', encoding='utf-8') as tmp_file:
+            return tmp_file.read()
 
 
 def get_commit_message() -> str:

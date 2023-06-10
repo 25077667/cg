@@ -33,5 +33,38 @@ $ poetry run python ./main.py
 - [ ] Tests and CI
 - [ ] Publish to PyPI, Homebrew, AUR, and scoop
 
+## Known issues:
+
+1. Nuitka building binary failed:
+```shell
+$ python -m nuitka --onefile --standalone  ./main.py -o cg
+
+Nuitka-Options:INFO: Used command line options: --onefile --standalone ./main.py -o cg
+Nuitka:INFO: Starting Python compilation with Nuitka '1.6.3' on Python '3.11' commercial grade 'not installed'.
+Nuitka-Plugins:WARNING: anti-bloat: Undesirable import of 'unittest' in 'git.util' (at '/Users/yangzhixuan/git/cg/.venv/lib/python3.11/site-packages/git/util.py:175') encountered. It may slow down
+Nuitka-Plugins:WARNING: compilation.
+Nuitka-Plugins:WARNING:     Complex topic! More information can be found at https://nuitka.net/info/unwanted-module.html
+Nuitka-Plugins:INFO: multiprocessing: Injecting pre-module load code for module 'multiprocessing':
+Nuitka-Plugins:INFO: multiprocessing:     Monkey patching "multiprocessing" load environment.
+Nuitka-Plugins:INFO: multiprocessing: Injecting post-module load code for module 'multiprocessing':
+Nuitka-Plugins:INFO: multiprocessing:     Monkey patching "multiprocessing" for compiled methods.
+Nuitka:INFO: Completed Python level compilation and optimization.
+Nuitka:INFO: Generating source code for C backend compiler.
+Nuitka:INFO: Running data composer tool for optimal constant value handling.
+Nuitka:INFO: Running C compilation via Scons.
+Nuitka-Scons:INFO: Backend C compiler: clang (clang).
+In file included from static_src/CompiledFunctionType.c:2864:
+In file included from /Users/yangzhixuan/git/cg/.venv/lib/python3.11/site-packages/nuitka/build/static_src/CompiledCodeHelpers.c:70:
+/Users/yangzhixuan/git/cg/.venv/lib/python3.11/site-packages/nuitka/build/static_src/HelpersFilesystemPaths.c:40:15: error: call to undeclared function '_NSGetExecutablePath'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
+    int res = _NSGetExecutablePath(binary_filename, &bufsize);
+              ^
+1 error generated.
+Nuitka-Scons:INFO: Backend linking program with 137 files (no progress information available for this stage).
+scons: *** [static_src/CompiledFunctionType.o] Error 1
+```
+    - Solution (Hot patch): Add `#include <mach-o/dyld.h>` in to the `HelpersFilesystemPaths.c` file.
+    - [name=scc] I will fix this issue in the future, send a pull request to the Nuitka project.
+
+
 ## License:
 GPLv3
