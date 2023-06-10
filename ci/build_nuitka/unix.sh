@@ -9,7 +9,7 @@ NAME="cg"
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     OUTPUT_POSTFIX=".elf"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
-    OPTIONS="$OPTIONS --osx-bundle-identifier org.nuitka"
+    OPTIONS="$OPTIONS"
     OUTPUT_POSTFIX=".macho"
 fi
 
