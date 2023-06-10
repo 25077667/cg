@@ -16,7 +16,7 @@ function check_lint() {
 
     # Invoke the pylint command for each python file
     foreach ($file in $python_files) {
-        $pylint_result = poetry run python -m pylint $file
+        $pylint_result = Invoke-Expression "poetry run python -m pylint $file"
         $pylint_score = $pylint_result[-1].Split(" ")[-1]
         $pylint_score = $pylint_score.Replace("(", "")
         $pylint_score = $pylint_score.Replace(")", "")
