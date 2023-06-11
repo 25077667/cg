@@ -136,7 +136,7 @@ Traceback (most recent call last):
   File "/private/var/folders/w0/_tn54h2167bdhk6j_jglllxh0000gn/T/onefile_55983_1686498617_427518/requests/adapters.py", line 532, in send
 requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api.openai.com', port=443): Read timed out. (read timeout=20)
 ```
-    - Solution: You might need to **retry it** in a few time. If it still doesn't work, you can try to increase the timeout value in `src/commit_msg_generator.py`.
+    - Solution: You might need to **retry it** in a few time. If it still doesn't work, you can try to increase the timeout value in `~/.cg/config.json` file.
 
 ## License:
 GPLv3
