@@ -84,32 +84,38 @@ jobs:
         git config --local user.email "ci@scc-net.tw"
         git config --local user.name "CI"
         VERSION=$(cat pyproject.toml | grep version | cut -d '"' -f 2)
-        echo "v${VERSION}-${{ github.run_number }}-${{ github.sha }}" > tag_name.txt
+        echo -n "v${VERSION}-${{ github.run_number }}-${{ github.sha }}" > tag_name.txt
         git tag $(cat tag_name.txt)
         git push origin --tags
       env:
         GH_TOKEN: ${{ secrets.DEPLOY_TOKEN2 }}
 
     - name: Download cg.elf artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: cg.elf
         path: release/
 
     - name: Download cg.exe artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: cg.exe
         path: release/
 
     - name: Download cg.macho artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: cg.macho
         path: release/
-    - name: Generate Release note md
+    
+    - name: Generate release environment variables
       run: |
         ./ci/release_note_generator.sh > release_note.md
+        echo "::set-env name=TAG_NAME::$(cat tag_name.txt)"
+        echo "::set-env name=RELEASE_NOTE::$(cat release_note.md)"
+        echo "::set-env name=RELEASE_NAME::$(echo Release $(cat tag_name.txt))"
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
 
     - uses: ncipollo/release-action@v1
       with:
@@ -125,6 +131,6 @@ jobs:
           release/cg.macho
       env:
         GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN2 }}
-        TAG_NAME: $(cat tag_name.txt)
-        RELEASE_NOTE: $(cat release_note.md)
-        RELEASE_NAME: $(echo Release $(cat tag_name.txt))
+        TAG_NAME: ${{ env.TAG_NAME }}
+        RELEASE_NOTE: ${{ env.RELEASE_NOTE }}
+        RELEASE_NAME: ${{ env.RELEASE_NAME }}
