@@ -43,6 +43,7 @@ the git commit message is suitable. You should only output a number
 from 0.0 to 10.0, without any reason.
 """
     },
+    "timeout": 30,
 }
 
 
@@ -82,7 +83,7 @@ class Config:
         except FileNotFoundError:
             os.makedirs(os.path.dirname(path), exist_ok=True)
             my_config = DEFAULT_CONFIG.copy()
-            if not my_config['tokens']:
+            if my_config['tokens'] == ['']:
                 my_config['tokens'].append(init_first_token())
 
             with open(path, 'w', encoding='utf-8') as file:
