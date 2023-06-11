@@ -84,7 +84,9 @@ jobs:
       run: |
         git config --local user.email "ci@scc-net.tw"
         git config --local user.name "CI"
-        git tag "${{ github.run_number }}"
+        VERSION=$(cat pyproject.toml | grep version | cut -d '"' -f 2)
+        echo "v${VERSION}-${{ github.run_number }}-${{ github.sha }}" > tag_name.txt
+        git tag -a $(cat tag_name.txt)
         git push origin --tags
       env:
         GH_TOKEN: ${{ secrets.DEPLOY_TOKEN2 }}
@@ -112,8 +114,8 @@ jobs:
 
     - uses: ncipollo/release-action@v1
       with:
-        name: ${{ github.run_number }} Release
-        tag: ${{ github.run_number }}
+        name: Release ${{ github.ref }}
+        tag:  ${{ github.ref }}
         body: release_note.md
         commit: ${{ github.sha }}
         draft: false
