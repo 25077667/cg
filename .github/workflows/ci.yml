@@ -120,11 +120,15 @@ jobs:
       with:
         name: cg.macho
         path: release/
+    - name: Generate Release note md
+      run: |
+        ./ci/release_note_generator.sh > release_note.md
+
     - uses: ncipollo/release-action@v1
       with:
-        name: ${{ github.run_number }}
+        name: ${{ github.run_number }} Release
         tag: ${{ github.run_number }}
-        body: ${{ github.run_number }}
+        body: release_note.md
         commit: ${{ github.sha }}
         draft: false
         prerelease: false
