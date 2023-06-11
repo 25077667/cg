@@ -90,6 +90,17 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
+    - name: Create Release Tag
+      if: startsWith(github.ref, 'refs/heads/')
+      run: |
+        git config --local user.email "ci@scc-net.tw"
+        git config --local user.name "CI"
+        git tag "${{ github.run_id }}-${{ github.sha }}"
+        git push origin --tags
+      env:
+        GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+
+
     - name: Download cg.elf artifact
       uses: actions/download-artifact@v2
       with:
