@@ -114,8 +114,8 @@ jobs:
 
     - uses: ncipollo/release-action@v1
       with:
-        name: Release ${{ github.ref }}
-        tag:  ${{ github.ref }}
+        name: Release $TAG_NAME
+        tag: $TAG_NAME
         body: release_note.md
         commit: ${{ github.sha }}
         draft: false
@@ -126,3 +126,4 @@ jobs:
           release/cg.macho
       env:
         GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN2 }}
+        TAG_NAME: $(cat tag_name.txt)
