@@ -66,18 +66,21 @@ jobs:
         ci/build_nuitka/unix.sh
 
     - name: Upload Artifact elf
+      if: matrix.os == 'ubuntu-latest'
       uses: actions/upload-artifact@v2
       with:
         name: cg.elf
         path: cg.elf
 
     - name: Upload Artifact exe
+      if: matrix.os == 'windows-latest'
       uses: actions/upload-artifact@v2
       with:
         name: cg.exe
         path: cg.exe
 
     - name: Upload Artifact macho
+      if: matrix.os == 'macos-latest'
       uses: actions/upload-artifact@v2
       with:
         name: cg.macho
@@ -104,22 +107,30 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: cg.elf
-        path: cg.elf
+        path: release/
 
     - name: Download cg.exe artifact
       uses: actions/download-artifact@v2
       with:
         name: cg.exe
-        path: cg.exe
+        path: release/
 
     - name: Download cg.macho artifact
       uses: actions/download-artifact@v2
       with:
         name: cg.macho
-        path: cg.macho
-
-    - name: Upload Release Asset
+        path: release/
+    - uses: ncipollo/release-action@v1
+      with:
+        name: ${{ github.run_number }}
+        tag: ${{ github.run_number }}
+        body: ${{ github.run_number }}
+        commit: ${{ github.sha }}
+        draft: false
+        prerelease: false
+        artifacts: |
+          release/cg.elf
+          release/cg.exe
+          release/cg.macho
       env:
-        GH_TOKEN: ${{ github.token }}  
-      run: |
-        gh release upload "${{ github.run_number }}" cg.elf cg.exe cg.macho
+        GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN2 }}
