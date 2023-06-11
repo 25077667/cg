@@ -62,6 +62,10 @@ def init_first_token() -> str:
           "'Create new API key' button.")
     print("After you get the token, please paste it here:")
     token = input()
+    # The token must contains "sk-" prefix.
+    if not token.startswith("sk-"):
+        print("The token is invalid, please try again.")
+        return init_first_token()
     return token
 
 
