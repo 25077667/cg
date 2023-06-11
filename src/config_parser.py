@@ -46,6 +46,24 @@ from 0.0 to 10.0, without any reason.
 }
 
 
+def init_first_token() -> str:
+    """
+    Only when the user is using cg at the first time and they didn't give it any token,
+    this function will be called to require the first token from the user.
+
+    Returns:
+        str: The first token.
+    """
+    print("It seems that you are using cg at the first time, please provide a token for cg.")
+    print("You can get a token from https://beta.openai.com/account/api-keys")
+    print("Please note that you should use the secret key, not the publishable key.")
+    print("If you don't have a secret key, you can create one by clicking the" +
+          "'Create new API key' button.")
+    print("After you get the token, please paste it here:")
+    token = input()
+    return token
+
+
 class Config:
     """
     A class for managing configuration settings.
@@ -63,9 +81,13 @@ class Config:
                 self.json_file = json.load(file)
         except FileNotFoundError:
             os.makedirs(os.path.dirname(path), exist_ok=True)
+            my_config = DEFAULT_CONFIG.copy()
+            if not my_config['tokens']:
+                my_config['tokens'].append(init_first_token())
+
             with open(path, 'w', encoding='utf-8') as file:
-                json.dump(DEFAULT_CONFIG, file)
-            self.json_file = DEFAULT_CONFIG.copy()
+                json.dump(my_config, file)
+            self.json_file = my_config
 
     def __getitem__(self, key: str):
         """
