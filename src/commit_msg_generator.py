@@ -101,7 +101,8 @@ def get_score(config: Config, diff: str, msg: str) -> float:
             'Content-Type': 'application/json'
         },
         json=data,
-        timeout=20,)
+        timeout=config['timeout'],
+    )
 
     score = find_first_number(
         response.json()['choices'][0]['message']['content'])
@@ -164,7 +165,7 @@ def generate_commit_message(
             'https://api.openai.com/v1/chat/completions',
             headers=headers,
             json=data,
-            timeout=30,
+            timeout=config['timeout'],
         )
 
         # Response from OpenAI API like:
