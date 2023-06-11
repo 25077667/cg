@@ -95,10 +95,10 @@ jobs:
       run: |
         git config --local user.email "ci@scc-net.tw"
         git config --local user.name "CI"
-        git tag "${{ github.run_number }}-${{ github.sha }}"
+        git tag "${{ github.run_number }}"
         git push origin --tags
       env:
-        GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+        GH_TOKEN: ${{ secrets.DEPLOY_TOKEN2 }}
 
     - name: Download cg.elf artifact
       uses: actions/download-artifact@v2
@@ -118,16 +118,8 @@ jobs:
         name: cg.macho
         path: cg.macho
 
-    - name: Upload Artifact to Release
-      uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/heads/')
-      with:
-        files: |
-          cg.elf
-          cg.exe
-          cg.macho
-        tag_name: "${{ github.run_number }}-${{ github.sha }}"
-        body: |
-          Release "${{ github.run_number }}-${{ github.sha }}"
-        draft: false
-        prerelease: false
+    - name: Upload Release Asset
+      env:
+        GH_TOKEN: ${{ github.token }}  
+      run: |
+        gh release upload "${{ github.run_number }}" cg.elf cg.exe cg.macho
