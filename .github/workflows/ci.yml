@@ -108,33 +108,18 @@ jobs:
         name: cg.macho
         path: cg.macho
 
-    - name: Upload Artifact to Release (cg.elf)
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+    - name: Upload Artifact to Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: cg.elf
-        asset_name: cg.elf
-        asset_content_type: application/octet-stream
-
-    - name: Upload Artifact to Release (cg.exe)
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: cg.exe
-        asset_name: cg.exe
-        asset_content_type: application/octet-stream
-
-    - name: Upload Artifact to Release (cg.macho)
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: cg.macho
-        asset_name: cg.macho
-        asset_content_type: application/octet-stream
+        files: |
+          cg.elf
+          cg.exe
+          cg.macho
+        tag_name: ${{ github.ref }}
+        body: |
+          Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+        token: ${{ secrets.DEPLOY_TOKEN }}
 
