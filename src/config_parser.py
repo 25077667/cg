@@ -84,7 +84,7 @@ class Config:
             os.makedirs(os.path.dirname(path), exist_ok=True)
             my_config = DEFAULT_CONFIG.copy()
             if my_config['tokens'] == ['']:
-                my_config['tokens'].append(init_first_token())
+                my_config['tokens'] = [init_first_token()]
 
             with open(path, 'w', encoding='utf-8') as file:
                 json.dump(my_config, file)
