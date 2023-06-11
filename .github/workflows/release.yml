@@ -53,21 +53,21 @@ jobs:
 
     - name: Upload Artifact elf
       if: matrix.os == 'ubuntu-latest'
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: cg.elf
         path: cg.elf
 
     - name: Upload Artifact exe
       if: matrix.os == 'windows-latest'
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: cg.exe
         path: cg.exe
 
     - name: Upload Artifact macho
       if: matrix.os == 'macos-latest'
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: cg.macho
         path: cg.macho
