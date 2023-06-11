@@ -43,6 +43,7 @@ the git commit message is suitable. You should only output a number
 from 0.0 to 10.0, without any reason.
 """
     },
+    "timeout": 30,
 }
 
 
