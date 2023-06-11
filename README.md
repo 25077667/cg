@@ -65,6 +65,55 @@ scons: *** [static_src/CompiledFunctionType.o] Error 1
     - Solution (Hot patch): Add `#include <mach-o/dyld.h>` in to the `HelpersFilesystemPaths.c` file.
     - [name=scc] I will fix this issue in the future, send a pull request to the Nuitka project.
 
+2. It might be timeout sometimes:
+```shell
+$ cg
+
+Traceback (most recent call last):
+  File "/private/var/folders/w0/_tn54h2167bdhk6j_jglllxh0000gn/T/onefile_55983_1686498617_427518/urllib3/connectionpool.py", line 536, in _make_request
+  File "/private/var/folders/w0/_tn54h2167bdhk6j_jglllxh0000gn/T/onefile_55983_1686498617_427518/urllib3/connection.py", line 454, in getresponse
+  File "/private/var/folders/w0/_tn54h2167bdhk6j_jglllxh0000gn/T/onefile_55983_1686498617_427518/http/client.py", line 1375, in getresponse
+  File "/private/var/folders/w0/_tn54h2167bdhk6j_jglllxh0000gn/T/onefile_55983_1686498617_427518/http/client.py", line 318, in begin
+  File "/private/var/folders/w0/_tn54h2167bdhk6j_jglllxh0000gn/T/onefile_55983_1686498617_427518/http/client.py", line 279, in _read_status
+  File "/private/var/folders/w0/_tn54h2167bdhk6j_jglllxh0000gn/T/onefile_55983_1686498617_427518/socket.py", line 706, in readinto
+  File "/private/var/folders/w0/_tn54h2167bdhk6j_jglllxh0000gn/T/onefile_55983_1686498617_427518/ssl.py", line 1278, in recv_into
+  File "/private/var/folders/w0/_tn54h2167bdhk6j_jglllxh0000gn/T/onefile_55983_1686498617_427518/ssl.py", line 1134, in read
+TimeoutError: The read operation timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/private/var/folders/w0/_tn54h2167bdhk6j_jglllxh0000gn/T/onefile_55983_1686498617_427518/requests/adapters.py", line 486, in send
+  File "/private/var/folders/w0/_tn54h2167bdhk6j_jglllxh0000gn/T/onefile_55983_1686498617_427518/urllib3/connectionpool.py", line 844, in urlopen
+  File "/private/var/folders/w0/_tn54h2167bdhk6j_jglllxh0000gn/T/onefile_55983_1686498617_427518/urllib3/util/retry.py", line 470, in increment
+  File "/private/var/folders/w0/_tn54h2167bdhk6j_jglllxh0000gn/T/onefile_55983_1686498617_427518/urllib3/util/util.py", line 39, in reraise
+  File "/private/var/folders/w0/_tn54h2167bdhk6j_jglllxh0000gn/T/onefile_55983_1686498617_427518/urllib3/connectionpool.py", line 790, in urlopen
+  File "/private/var/folders/w0/_tn54h2167bdhk6j_jglllxh0000gn/T/onefile_55983_1686498617_427518/urllib3/connectionpool.py", line 538, in _make_request
+  File "/private/var/folders/w0/_tn54h2167bdhk6j_jglllxh0000gn/T/onefile_55983_1686498617_427518/urllib3/connectionpool.py", line 372, in _raise_timeout
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api.openai.com', port=443): Read timed out. (read timeout=20)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/private/var/folders/w0/_tn54h2167bdhk6j_jglllxh0000gn/T/onefile_55983_1686498617_427518/main.py", line 98, in <module>
+    main()
+
+  File "/private/var/folders/w0/_tn54h2167bdhk6j_jglllxh0000gn/T/onefile_55983_1686498617_427518/main.py", line 88, in main
+    commit_message = get_commit_message()
+
+  File "/private/var/folders/w0/_tn54h2167bdhk6j_jglllxh0000gn/T/onefile_55983_1686498617_427518/main.py", line 67, in get_commit_message
+    for msg in generate_commit_message(config, CURRENT_PATH):
+
+  File "/private/var/folders/w0/_tn54h2167bdhk6j_jglllxh0000gn/T/onefile_55983_1686498617_427518/src/commit_msg_generator.py", line 191, in generate_commit_message
+  File "/private/var/folders/w0/_tn54h2167bdhk6j_jglllxh0000gn/T/onefile_55983_1686498617_427518/src/commit_msg_generator.py", line 97, in get_score
+  File "/private/var/folders/w0/_tn54h2167bdhk6j_jglllxh0000gn/T/onefile_55983_1686498617_427518/requests/api.py", line 115, in post
+  File "/private/var/folders/w0/_tn54h2167bdhk6j_jglllxh0000gn/T/onefile_55983_1686498617_427518/requests/api.py", line 59, in request
+  File "/private/var/folders/w0/_tn54h2167bdhk6j_jglllxh0000gn/T/onefile_55983_1686498617_427518/requests/sessions.py", line 589, in request
+  File "/private/var/folders/w0/_tn54h2167bdhk6j_jglllxh0000gn/T/onefile_55983_1686498617_427518/requests/sessions.py", line 703, in send
+  File "/private/var/folders/w0/_tn54h2167bdhk6j_jglllxh0000gn/T/onefile_55983_1686498617_427518/requests/adapters.py", line 532, in send
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api.openai.com', port=443): Read timed out. (read timeout=20)
+```
+    - Solution: You might need to **retry it** in a few time. If it still doesn't work, you can try to increase the timeout value in `src/commit_msg_generator.py`.
 
 ## License:
 GPLv3
