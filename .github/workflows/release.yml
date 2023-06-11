@@ -26,7 +26,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Cache dependencies
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/.cache/pypoetry
         key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
@@ -53,21 +53,21 @@ jobs:
 
     - name: Upload Artifact elf
       if: matrix.os == 'ubuntu-latest'
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: cg.elf
         path: cg.elf
 
     - name: Upload Artifact exe
       if: matrix.os == 'windows-latest'
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: cg.exe
         path: cg.exe
 
     - name: Upload Artifact macho
       if: matrix.os == 'macos-latest'
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: cg.macho
         path: cg.macho
@@ -80,41 +80,48 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Create Release Tag
-      if: startsWith(github.ref, 'refs/heads/')
       run: |
         git config --local user.email "ci@scc-net.tw"
         git config --local user.name "CI"
-        git tag "${{ github.run_number }}"
+        VERSION=$(cat pyproject.toml | grep version | cut -d '"' -f 2)
+        echo -n "v${VERSION}-${{ github.run_number }}-${{ github.sha }}" > tag_name.txt
+        git tag $(cat tag_name.txt)
         git push origin --tags
       env:
         GH_TOKEN: ${{ secrets.DEPLOY_TOKEN2 }}
 
     - name: Download cg.elf artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: cg.elf
         path: release/
 
     - name: Download cg.exe artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: cg.exe
         path: release/
 
     - name: Download cg.macho artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: cg.macho
         path: release/
-    - name: Generate Release note md
+    
+    - name: Generate release environment variables
       run: |
         ./ci/release_note_generator.sh > release_note.md
+        echo "::set-env name=TAG_NAME::$(cat tag_name.txt)"
+        echo "::set-env name=RELEASE_NOTE::$(cat release_note.md)"
+        echo "::set-env name=RELEASE_NAME::$(echo Release $(cat tag_name.txt))"
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
 
     - uses: ncipollo/release-action@v1
       with:
-        name: ${{ github.run_number }} Release
-        tag: ${{ github.run_number }}
-        body: release_note.md
+        name: ${{ env.RELEASE_NAME }}
+        tag: ${{ env.TAG_NAME }}
+        body: ${{ env.RELEASE_NOTE }}
         commit: ${{ github.sha }}
         draft: false
         prerelease: false
@@ -124,3 +131,6 @@ jobs:
           release/cg.macho
       env:
         GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN2 }}
+        TAG_NAME: ${{ env.TAG_NAME }}
+        RELEASE_NOTE: ${{ env.RELEASE_NOTE }}
+        RELEASE_NAME: ${{ env.RELEASE_NAME }}
