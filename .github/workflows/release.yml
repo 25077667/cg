@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.11]
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest, macos-latest-xlarge]
 
     steps:
     - name: Checkout code
@@ -55,22 +55,29 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       uses: actions/upload-artifact@v3
       with:
-        name: cg.elf
-        path: cg.elf
+        name: cg-x86_64.elf
+        path: cg-x86_64.elf
 
     - name: Upload Artifact exe
       if: matrix.os == 'windows-latest'
       uses: actions/upload-artifact@v3
       with:
-        name: cg.exe
-        path: cg.exe
+        name: cg-x86_64.exe
+        path: cg-x86_64.exe
 
     - name: Upload Artifact macho
       if: matrix.os == 'macos-latest'
       uses: actions/upload-artifact@v3
       with:
-        name: cg.macho
-        path: cg.macho
+        name: cg-x86_64.macho
+        path: cg-x86_64.macho
+    
+    - name: Upload Artifact macho-M1
+      if: matrix.os == 'macos-latest-xlarge'
+      uses: actions/upload-artifact@v3
+      with:
+        name: cg-arm64.macho
+        path: cg-arm64.macho
 
   release:
     needs: build
@@ -90,22 +97,28 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.DEPLOY_TOKEN2 }}
 
-    - name: Download cg.elf artifact
+    - name: Download cg-x86_64.elf artifact
       uses: actions/download-artifact@v3
       with:
-        name: cg.elf
+        name: cg-x86_64.elf
         path: release/
 
-    - name: Download cg.exe artifact
+    - name: Download cg-x86_64.exe artifact
       uses: actions/download-artifact@v3
       with:
-        name: cg.exe
+        name: cg-x86_64.exe
         path: release/
 
-    - name: Download cg.macho artifact
+    - name: Download cg-x86_64.macho artifact
       uses: actions/download-artifact@v3
       with:
-        name: cg.macho
+        name: cg-x86_64.macho
+        path: release/
+    
+    - name: Download cg-arm64.macho artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: cg-arm64.macho
         path: release/
     
     - name: Generate release environment variables
@@ -126,9 +139,10 @@ jobs:
         draft: false
         prerelease: false
         artifacts: |
-          release/cg.elf
-          release/cg.exe
-          release/cg.macho
+          release/cg-x86_64.elf
+          release/cg-x86_64.exe
+          release/cg-x86_64.macho
+          release/cg-arm64.macho
       env:
         GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN2 }}
         TAG_NAME: ${{ env.TAG_NAME }}
