@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.11]
-        os: [ubuntu-latest, macos-latest, windows-latest, macos-latest-xlarge]
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
     - name: Checkout code
@@ -101,12 +101,6 @@ jobs:
       with:
         name: cg-x86_64.exe
         path: release/
-
-    - name: Download cg-x86_64.macho artifact
-      uses: actions/download-artifact@v3
-      with:
-        name: cg-x86_64.macho
-        path: release/
     
     - name: Download cg-arm64.macho artifact
       uses: actions/download-artifact@v3
@@ -134,7 +128,6 @@ jobs:
         artifacts: |
           release/cg-x86_64.elf
           release/cg-x86_64.exe
-          release/cg-x86_64.macho
           release/cg-arm64.macho
       env:
         GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN2 }}
