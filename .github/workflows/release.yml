@@ -69,13 +69,6 @@ jobs:
       if: matrix.os == 'macos-latest'
       uses: actions/upload-artifact@v3
       with:
-        name: cg-x86_64.macho
-        path: cg-x86_64.macho
-    
-    - name: Upload Artifact macho-M1
-      if: matrix.os == 'macos-latest-xlarge'
-      uses: actions/upload-artifact@v3
-      with:
         name: cg-arm64.macho
         path: cg-arm64.macho
 
