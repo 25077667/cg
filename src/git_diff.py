@@ -16,4 +16,4 @@ def git_diff(repo_path: str) -> str:
         str: The git diff as a string.
     """
     repo = Repo(repo_path)
-    return repo.git.diff('HEAD')
+    return repo.git.diff("HEAD")

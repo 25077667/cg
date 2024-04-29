@@ -1,18 +1,19 @@
 """
 Configuration parser for the commit message generator.
 """
+
 import json
 import os
 
-GPT_TOKENS = tuple(os.environ.get('GPT_TOKENS', '').replace(
-    ';', ',').replace(':', ',').split(','))
+GPT_TOKENS = tuple(
+    os.environ.get("GPT_TOKENS", "").replace(";", ",").replace(":", ",").split(",")
+)
 
 DEFAULT_CONFIG = {
     "tokens": list(GPT_TOKENS),
     "interactive": True,
     "model": "gpt-3.5-turbo",
-    "system_prompt":
-    """I want you to act as a commit message generator.
+    "system_prompt": """I want you to act as a commit message generator.
 I will provide you with the git diff, and you should generate
 an appropriate commit message using the conventional commit format.
 
@@ -41,7 +42,7 @@ Write git commit message following these rules:
         "prompt": """You are a scoring machine, just output the score of
 the git commit message is suitable. You should only output a number
 from 0.0 to 10.0, without any reason.
-"""
+""",
     },
     "timeout": 30,
 }
@@ -55,11 +56,15 @@ def init_first_token() -> str:
     Returns:
         str: The first token.
     """
-    print("It seems that you are using cg at the first time, please provide a token for cg.")
+    print(
+        "It seems that you are using cg at the first time, please provide a token for cg."
+    )
     print("You can get a token from https://beta.openai.com/account/api-keys")
     print("Please note that you should use the secret key, not the publishable key.")
-    print("If you don't have a secret key, you can create one by clicking the" +
-          "'Create new API key' button.")
+    print(
+        "If you don't have a secret key, you can create one by clicking the"
+        + "'Create new API key' button."
+    )
     print("After you get the token, please paste it here:")
     token = input()
     # The token must contains "sk-" prefix.
@@ -82,15 +87,15 @@ class Config:
             path (str): The path to the JSON configuration file.
         """
         try:
-            with open(path, 'r', encoding='utf-8') as file:
+            with open(path, "r", encoding="utf-8") as file:
                 self.json_file = json.load(file)
         except FileNotFoundError:
             os.makedirs(os.path.dirname(path), exist_ok=True)
             my_config = DEFAULT_CONFIG.copy()
-            if my_config['tokens'] == ['']:
-                my_config['tokens'] = [init_first_token()]
+            if my_config["tokens"] == [""]:
+                my_config["tokens"] = [init_first_token()]
 
-            with open(path, 'w', encoding='utf-8') as file:
+            with open(path, "w", encoding="utf-8") as file:
                 json.dump(my_config, file)
             self.json_file = my_config
 

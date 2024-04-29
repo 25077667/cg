@@ -1,6 +1,7 @@
 """
 This file contains the argument parser for the program.
 """
+
 from argparse import ArgumentParser
 import os
 
@@ -13,15 +14,12 @@ class Args:
     def __init__(self) -> None:
         self.parser = ArgumentParser()
         self.parser.add_argument(
-            '-c',
-            '--config',
+            "-c",
+            "--config",
             type=str,
-            default=os.path.join(
-                os.path.expanduser('~'),
-                '.cg',
-                'config.json'
-            ),
-            help='Path to config file')
+            default=os.path.join(os.path.expanduser("~"), ".cg", "config.json"),
+            help="Path to config file",
+        )
 
         self.args = self.parser.parse_args()
 

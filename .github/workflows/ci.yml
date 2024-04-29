@@ -40,7 +40,7 @@ jobs:
 
     - name: Check format
       run: |
-        poetry run autopep8 --in-place --aggressive --recursive .
+        poetry run black .
         git diff --exit-code
       
     - name: Check lint (windows)
