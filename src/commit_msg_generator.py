@@ -56,7 +56,9 @@ def make_api_request(config: Config, messages: list[dict], token: str) -> dict:
         requests.HTTPError: If the API request fails.
     """
     url = "https://api.openai.com/v1/chat/completions"
-    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"}
     data = {
         "model": config["model"],
         "messages": messages,
@@ -66,7 +68,11 @@ def make_api_request(config: Config, messages: list[dict], token: str) -> dict:
         "frequency_penalty": config["frequency_penalty"],
         "presence_penalty": config["presence_penalty"],
     }
-    response = requests.post(url, headers=headers, json=data, timeout=config["timeout"])
+    response = requests.post(
+        url,
+        headers=headers,
+        json=data,
+        timeout=config["timeout"])
     response.raise_for_status()
     return response.json()
 
@@ -114,7 +120,8 @@ def get_score(config: Config, diff: str, msg: str) -> float:
     """
     messages = [
         {"role": "system", "content": config["revise"]["prompt"]},
-        {"role": "user", "content": f"Source diff:\n{diff}\n\nCommit message:\n{msg}"},
+        {"role": "user", "content": f"Source diff:\n{
+            diff}\n\nCommit message:\n{msg}"},
     ]
     token_manager = TokenManager.get_instance(config["tokens"])
     result = make_api_request(config, messages, token_manager.pop_token())
