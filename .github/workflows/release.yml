@@ -85,7 +85,7 @@ jobs:
       matrix:
         arch: [armv7l, aarch64]
         include:
-          - arch: armv6l
+          - arch: armv7l
             cpu: cortex-a7
             base_image: raspios_lite:latest
             cpu_info: cpuinfo/raspberrypi_zero2_w
@@ -160,7 +160,7 @@ jobs:
         commit: ${{ github.sha }}
         draft: false
         prerelease: false
-        artifacts: release/*.elf release/*.exe release/*.macho
+        artifacts: "release/*"
       env:
         GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN2 }}
         TAG_NAME: ${{ env.TAG_NAME }}

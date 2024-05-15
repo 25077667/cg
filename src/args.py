@@ -4,6 +4,17 @@ This file contains the argument parser for the program.
 
 from argparse import ArgumentParser
 import os
+from . import __version__
+
+
+def _get_version() -> str:
+    return __version__.__version__
+
+
+DESCRIPTION = """
+A tool to generate commit messages based on the current state of a git repository.
+For more details, see: https://github.com/25077667/cg
+"""
 
 
 class Args:
@@ -12,13 +23,21 @@ class Args:
     """
 
     def __init__(self) -> None:
-        self.parser = ArgumentParser()
+        self.parser = ArgumentParser(
+            description=DESCRIPTION,
+        )
         self.parser.add_argument(
             "-c",
             "--config",
             type=str,
             default=os.path.join(os.path.expanduser("~"), ".cg", "config.json"),
             help="Path to config file",
+        )
+        self.parser.add_argument(
+            "-v",
+            "--version",
+            action="version",
+            version=_get_version(),
         )
 
         self.args = self.parser.parse_args()
