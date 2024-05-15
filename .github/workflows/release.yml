@@ -72,8 +72,50 @@ jobs:
         name: cg-arm64.macho
         path: cg-arm64.macho
 
+  build_arm:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [armv6l, aarch64]
+        include:
+          - arch: armv6l
+            cpu: arm1176
+            base_image: raspios_lite:latest
+            cpu_info: raspberrypi_zero_w
+          - arch: aarch64
+            cpu: cortex-a53
+            base_image: raspios_lite_arm64:latest
+            cpu_info: raspberrypi_zero2_w_arm64_w
+    steps:
+    - uses: actions/checkout@v2
+    - uses: pguyot/arm-runner-action@v2
+      with:
+        base_image: ${{ matrix.base_image }}
+        cpu: ${{ matrix.cpu }}
+        cpu_info: ${{ matrix.cpu_info }}
+        commands: |
+          apt-get update -y
+          apt-get install build-essential python3 python3-pip patchelf -y
+          pip3 install poetry --break-system-packages
+          python3 -m poetry shell
+          pip3 install poetry
+          poetry install
+          ci/build_nuitka/unix.sh
+    - name: Upload Artifact arm (aarch64)
+      uses: actions/upload-artifact@v3
+      if: matrix.arch == 'aarch64'
+      with:
+        name: cg-aarch64.elf
+        path: cg-aarch64.elf
+    - name: Upload Artifact arm (armv6l)
+      uses: actions/upload-artifact@v3
+      if: matrix.arch == 'armv6l'
+      with:
+        name: cg-arm.elf
+        path: cg-arm.elf
+
   release:
-    needs: build
+    needs: [build, build_arm]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -108,6 +150,18 @@ jobs:
         name: cg-arm64.macho
         path: release/
     
+    - name: Download cg-aarch64.elf artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: cg-aarch64.elf
+        path: release/
+    
+    - name: Download cg-arm.elf artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: cg-arm.elf
+        path: release/
+    
     - name: Generate release environment variables
       run: |
         ./ci/release_note_generator.sh > release_note.md
@@ -129,6 +183,8 @@ jobs:
           release/cg-x86_64.elf
           release/cg-x86_64.exe
           release/cg-arm64.macho
+          release/cg-aarch64.elf
+          release/cg-arm.elf
       env:
         GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN2 }}
         TAG_NAME: ${{ env.TAG_NAME }}
