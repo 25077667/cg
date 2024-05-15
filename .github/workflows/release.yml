@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.11]
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest, macos-13]
 
     steps:
     - name: Checkout code
@@ -65,6 +65,13 @@ jobs:
         name: cg-x86_64.exe
         path: cg-x86_64.exe
 
+    - name: Upload Artifact macho (x86)
+      if: matrix.os == 'macos-13'
+      uses: actions/upload-artifact@v3
+      with:
+        name: cg-x86_64.macho
+        path: cg-x86_64.macho
+
     - name: Upload Artifact macho
       if: matrix.os == 'macos-latest'
       uses: actions/upload-artifact@v3
@@ -79,13 +86,13 @@ jobs:
         arch: [armv6l, aarch64]
         include:
           - arch: armv6l
-            cpu: arm1176
+            cpu: cortex-a7
             base_image: raspios_lite:latest
-            cpu_info: raspberrypi_zero_w
+            cpu_info: cpuinfo/raspberrypi_zero2_w
           - arch: aarch64
             cpu: cortex-a53
             base_image: raspios_lite_arm64:latest
-            cpu_info: raspberrypi_zero2_w_arm64_w
+            cpu_info: cpuinfo/raspberrypi_zero2_w_arm64
     steps:
     - uses: actions/checkout@v2
     - uses: pguyot/arm-runner-action@v2
@@ -93,26 +100,18 @@ jobs:
         base_image: ${{ matrix.base_image }}
         cpu: ${{ matrix.cpu }}
         cpu_info: ${{ matrix.cpu_info }}
+        shell: bash
         commands: |
           apt-get update -y
           apt-get install build-essential python3 python3-pip patchelf -y
-          pip3 install poetry --break-system-packages
-          python3 -m poetry shell
-          pip3 install poetry
+          pip install poetry --break-system-packages
           poetry install
           ci/build_nuitka/unix.sh
-    - name: Upload Artifact arm (aarch64)
+    - name: Upload Artifact (ARM)
       uses: actions/upload-artifact@v3
-      if: matrix.arch == 'aarch64'
       with:
-        name: cg-aarch64.elf
-        path: cg-aarch64.elf
-    - name: Upload Artifact arm (armv6l)
-      uses: actions/upload-artifact@v3
-      if: matrix.arch == 'armv6l'
-      with:
-        name: cg-arm.elf
-        path: cg-arm.elf
+        name: cg-${{ matrix.arch }}.elf
+        path: cg-${{ matrix.arch }}.elf
 
   release:
     needs: [build, build_arm]
@@ -132,36 +131,11 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.DEPLOY_TOKEN2 }}
 
-    - name: Download cg-x86_64.elf artifact
+    - name: Download all artifacts
       uses: actions/download-artifact@v3
       with:
-        name: cg-x86_64.elf
         path: release/
 
-    - name: Download cg-x86_64.exe artifact
-      uses: actions/download-artifact@v3
-      with:
-        name: cg-x86_64.exe
-        path: release/
-    
-    - name: Download cg-arm64.macho artifact
-      uses: actions/download-artifact@v3
-      with:
-        name: cg-arm64.macho
-        path: release/
-    
-    - name: Download cg-aarch64.elf artifact
-      uses: actions/download-artifact@v3
-      with:
-        name: cg-aarch64.elf
-        path: release/
-    
-    - name: Download cg-arm.elf artifact
-      uses: actions/download-artifact@v3
-      with:
-        name: cg-arm.elf
-        path: release/
-    
     - name: Generate release environment variables
       run: |
         ./ci/release_note_generator.sh > release_note.md
@@ -179,12 +153,7 @@ jobs:
         commit: ${{ github.sha }}
         draft: false
         prerelease: false
-        artifacts: |
-          release/cg-x86_64.elf
-          release/cg-x86_64.exe
-          release/cg-arm64.macho
-          release/cg-aarch64.elf
-          release/cg-arm.elf
+        artifacts: release/*.elf release/*.exe release/*.macho
       env:
         GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN2 }}
         TAG_NAME: ${{ env.TAG_NAME }}
