@@ -121,17 +121,20 @@ jobs:
           mkdir -p ${{ matrix.copy_artifact_dest }}
     - name: Extract Artifact from output image
       run: |
-        set my_cwd=$(pwd)
-        mkdir -p ${{ runner.temp }}/mount
-        mount ${{ steps.arm_runner_install.outputs.image }} ${{ runner.temp }}/mount
+        # debugging purpose, we upload image to artifacts
         mkdir -p ./release
-        cp -r ${{ runner.temp }}/mount ./release
-
+        cp ${{ steps.arm_runner_install.outputs.image }} cg-${{ matrix.arch }}.img
     - name: Upload Artifact (ARM)
       uses: actions/upload-artifact@v4
       with:
-        name: release/cg-${{ matrix.arch }}.elf
-        path: release/cg-${{ matrix.arch }}.elf
+        name: cg-${{ matrix.arch }}.img
+        path: cg-${{ matrix.arch }}.img
+
+    # - name: Upload Artifact (ARM)
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: release/cg-${{ matrix.arch }}.elf
+    #     path: release/cg-${{ matrix.arch }}.elf
 
   release:
     needs: [build, build_arm]
