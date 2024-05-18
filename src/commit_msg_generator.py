@@ -60,7 +60,7 @@ def make_api_request(config: Config, messages: list[dict], token: str) -> dict:
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     data = {
         "model": config["model"],
-        "messages": json.dumps(messages),
+        "messages": messages,
         "max_tokens": config["max_tokens"],
         "temperature": config["temperature"],
         "top_p": config["top_p"],
@@ -68,7 +68,7 @@ def make_api_request(config: Config, messages: list[dict], token: str) -> dict:
         "presence_penalty": config["presence_penalty"],
     }
     # # Print as curl command for debugging purposes
-    # curl_line = f"""curl -X POST "{url}" -H "Authorization : Bearer {token}" -H "Content-Type: application/json" -d '{data}'"""
+    # curl_line = f"""curl -X POST "{url}" -H "Authorization : Bearer {token}" -H "Content-Type: application/json" -d "{json.dumps(data)}" """
     # print(curl_line)
     response = requests.post(
         url, headers=headers, data=json.dumps(data), timeout=config["timeout"]
