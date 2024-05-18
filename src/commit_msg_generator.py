@@ -8,6 +8,7 @@ from random import shuffle
 from typing import Generator
 import re
 import requests
+import json
 
 from .config_parser import Config
 from .git_diff import git_diff
@@ -59,14 +60,17 @@ def make_api_request(config: Config, messages: list[dict], token: str) -> dict:
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     data = {
         "model": config["model"],
-        "messages": messages,
+        "messages": json.dumps(messages),
         "max_tokens": config["max_tokens"],
         "temperature": config["temperature"],
         "top_p": config["top_p"],
         "frequency_penalty": config["frequency_penalty"],
         "presence_penalty": config["presence_penalty"],
     }
-    response = requests.post(url, headers=headers, json=data, timeout=config["timeout"])
+    # # Print as curl command for debugging purposes
+    # curl_line = f"""curl -X POST "{url}" -H "Authorization : Bearer {token}" -H "Content-Type: application/json" -d '{data}'"""
+    # print(curl_line)
+    response = requests.post(url, headers=headers, data=json.dumps(data), timeout=config["timeout"])
     response.raise_for_status()
     return response.json()
 
