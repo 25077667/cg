@@ -19,23 +19,63 @@ def get_user_input(prompt: str, default: str) -> str:
     """
     Prompt the user for input and return the input value or the default value.
     """
-    user_input = input(f"{prompt} ({default})")
+    user_input = input(f"{prompt} ({default}) ").strip()
     if not user_input:
         return default
     return user_input
+
+
+def check_git_config(repo: Repo):
+    """
+    Check if the necessary git configuration is set (user.name, user.email, and SSH key).
+    Emit alerts if any configuration is missing.
+    """
+    config_reader = repo.config_reader()
+    missing_configs = []
+
+    try:
+        _ = config_reader.get_value("user", "name")
+    except (KeyError, ValueError):
+        missing_configs.append("user.name")
+
+    try:
+        _ = config_reader.get_value("user", "email")
+    except (KeyError, ValueError):
+        missing_configs.append("user.email")
+
+    if missing_configs:
+        print(f"Alert: Missing Git configuration: {', '.join(missing_configs)}")
+        print("Please set them using the following commands:")
+        if "user.name" in missing_configs:
+            print("  git config --global user.name 'Your Name'")
+        if "user.email" in missing_configs:
+            print("  git config --global user.email 'your.email@example.com'")
+
+    ssh_key_path = os.path.expanduser("~/.ssh/id_rsa")
+    if not os.path.exists(ssh_key_path):
+        print("Alert: SSH key not found.")
+        print(
+            "Please generate one using the following command and add it to your SSH agent and GitHub account:"
+        )
+        print("  ssh-keygen -t rsa -b 4096 -C 'your.email@example.com'")
 
 
 def commit_full_text_message(repo_path: str, message: str) -> str:
     """
     Commit the provided message to the repository at the given path and return the commit hash.
     """
-    repo = Repo(repo_path)
-    # Fetch author and committer information from Git config
-    author = str(repo.config_reader().get_value("user", "name"))
-    author_email = str(repo.config_reader().get_value("user", "email"))
-    committer = Actor(author, author_email)
+    try:
+        repo = Repo(repo_path)
+        check_git_config(repo)
 
-    return repo.index.commit(message=message, committer=committer).hexsha
+        author = str(repo.config_reader().get_value("user", "name"))
+        author_email = str(repo.config_reader().get_value("user", "email"))
+        committer = Actor(author, author_email)
+
+        return repo.index.commit(message=message, committer=committer).hexsha
+    except Exception as e:
+        print(f"Error: Failed to commit the message. Details: {e}")
+        sys.exit(1)
 
 
 def edit_message(orig: str) -> str:
@@ -59,37 +99,45 @@ def get_commit_message() -> str:
     Generate commit messages based on the configuration and prompt the user for confirmation.
     Return the selected commit message or an empty string if none is selected.
     """
-    config_path = args["config"]
-    config = Config(config_path)
+    try:
+        config_path = args["config"]
+        config = Config(config_path)
 
-    for msg in generate_commit_message(config, CURRENT_PATH):
-        print(msg)
-        if config["interactive"]:
-            user_selection = get_user_input(
-                "Is this commit message satisfactory? (Y/n/e) ", "Y"
-            )
-            if user_selection == "Y":
+        for msg in generate_commit_message(config, CURRENT_PATH):
+            print(msg)
+            if config["interactive"]:
+                user_selection = get_user_input(
+                    "Is this commit message satisfactory? (Y/n/e)", "Y"
+                )
+                if user_selection.lower() == "y":
+                    return msg
+                if user_selection.lower() == "n":
+                    continue
+                if user_selection.lower() == "e":
+                    return edit_message(msg)
+            else:
                 return msg
-            if user_selection == "n":
-                continue
-            if user_selection == "e":
-                return edit_message(msg)
-        else:
-            return msg
 
-    return ""
+        return ""
+    except Exception as e:
+        print(f"Error: Failed to generate commit message. Details: {e}")
+        sys.exit(1)
 
 
 def main() -> None:
     """
     Main function that generates and commits a message based on the configuration.
     """
-    commit_message = get_commit_message()
-    if commit_message:
-        commit_hash = commit_full_text_message(CURRENT_PATH, commit_message)
-        print(f"Commit message generated: {commit_hash}")
-    else:
-        print("No commit message generated. Exiting...")
+    try:
+        commit_message = get_commit_message()
+        if commit_message:
+            commit_hash = commit_full_text_message(CURRENT_PATH, commit_message)
+            print(f"Commit message generated and committed: {commit_hash}")
+        else:
+            print("No commit message generated. Exiting...")
+            sys.exit(1)
+    except Exception as e:
+        print(f"Error: An unexpected error occurred. Details: {e}")
         sys.exit(1)
 
 
