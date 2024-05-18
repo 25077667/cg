@@ -6,13 +6,39 @@ import os
 import sys
 import tempfile
 import subprocess
-from git import Repo, Actor
+from git import Repo, Actor, InvalidGitRepositoryError, NoSuchPathError
 
 from src.args import args
 from src.config_parser import Config
 from src.commit_msg_generator import generate_commit_message
 
-CURRENT_PATH = os.path.curdir
+
+def get_repo_path(start_path: str) -> str:
+    """
+    Traverse from the start_path to the top-level directory to find a git repository.
+    Prioritize submodules by using the first repository found from the current directory upwards.
+
+    Args:
+        start_path (str): The starting directory path.
+
+    Returns:
+        str: The path to the git repository.
+    """
+    current_path = start_path
+    while True:
+        try:
+            repo = Repo(current_path, search_parent_directories=True)
+            return repo.git.rev_parse("--show-toplevel")
+        except (InvalidGitRepositoryError, NoSuchPathError):
+            # Move to the parent directory
+            parent_path = os.path.dirname(current_path)
+            if parent_path == current_path:  # Reached the top level
+                break
+            current_path = parent_path
+
+    raise RuntimeError(
+        "Error: No git repository found in the current directory or any parent directories."
+    )
 
 
 def get_user_input(prompt: str, default: str) -> str:
@@ -34,12 +60,12 @@ def check_git_config(repo: Repo):
     missing_configs = []
 
     try:
-        _ = config_reader.get_value("user", "name")
+        author = config_reader.get_value("user", "name")
     except (KeyError, ValueError):
         missing_configs.append("user.name")
 
     try:
-        _ = config_reader.get_value("user", "email")
+        author_email = config_reader.get_value("user", "email")
     except (KeyError, ValueError):
         missing_configs.append("user.email")
 
@@ -94,7 +120,7 @@ def edit_message(orig: str) -> str:
             return tmp_file.read()
 
 
-def get_commit_message() -> str:
+def get_commit_message(repo_path: str) -> str:
     """
     Generate commit messages based on the configuration and prompt the user for confirmation.
     Return the selected commit message or an empty string if none is selected.
@@ -103,7 +129,7 @@ def get_commit_message() -> str:
         config_path = args["config"]
         config = Config(config_path)
 
-        for msg in generate_commit_message(config, CURRENT_PATH):
+        for msg in generate_commit_message(config, repo_path):
             print(msg)
             if config["interactive"]:
                 user_selection = get_user_input(
@@ -129,9 +155,10 @@ def main() -> None:
     Main function that generates and commits a message based on the configuration.
     """
     try:
-        commit_message = get_commit_message()
+        repo_path = get_repo_path(os.getcwd())
+        commit_message = get_commit_message(repo_path)
         if commit_message:
-            commit_hash = commit_full_text_message(CURRENT_PATH, commit_message)
+            commit_hash = commit_full_text_message(repo_path, commit_message)
             print(f"Commit message generated and committed: {commit_hash}")
         else:
             print("No commit message generated. Exiting...")
