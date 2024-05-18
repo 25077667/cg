@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cg"
-version = "1.0.0"
+version = "1.0.1"
 description = ""
 authors = ["scc <scc@teamt5.org>"]
 license = "GPL3"
