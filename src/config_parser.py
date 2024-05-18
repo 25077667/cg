@@ -86,18 +86,16 @@ class Config:
         Args:
             path (str): The path to the JSON configuration file.
         """
+        self.path = path
         try:
             with open(path, "r", encoding="utf-8") as file:
                 self.json_file = json.load(file)
         except FileNotFoundError:
-            os.makedirs(os.path.dirname(path), exist_ok=True)
-            my_config = DEFAULT_CONFIG.copy()
-            if my_config["tokens"] == [""]:
-                my_config["tokens"] = [init_first_token()]
-
-            with open(path, "w", encoding="utf-8") as file:
-                json.dump(my_config, file)
-            self.json_file = my_config
+            self.json_file = DEFAULT_CONFIG.copy()
+            if self.json_file["tokens"] == [""]:
+                self.json_file["tokens"] = [init_first_token()]
+            self._save_config()
+        self._ensure_defaults()
 
     def __getitem__(self, key: str):
         """
@@ -111,7 +109,6 @@ class Config:
         """
         return self.json_file[key]
 
-    # Dummy function for pylint
     def __setitem__(self, key: str, value: str) -> None:
         """
         Set the value associated with the given key.
@@ -121,3 +118,34 @@ class Config:
             value (str): The value to be set.
         """
         self.json_file[key] = value
+        self._save_config()
+
+    def _ensure_defaults(self):
+        """
+        Ensure all default keys are present in the JSON file and update if necessary.
+        """
+        updated = False
+        for key, value in DEFAULT_CONFIG.items():
+            if key not in self.json_file:
+                self.json_file[key] = value
+                updated = True
+            elif isinstance(value, dict):
+                for sub_key, sub_value in value.items():
+                    if sub_key not in self.json_file[key]:
+                        self.json_file[key][sub_key] = sub_value
+                        updated = True
+        if updated:
+            self._save_config()
+
+    def _save_config(self):
+        """
+        Save the current configuration to disk.
+        """
+        with open(self.path, "w", encoding="utf-8") as file:
+            json.dump(self.json_file, file, indent=4)
+
+
+# Example usage:
+# config = Config("/path/to/config.json")
+# print(config["model"])
+# config["model"] = "new-model"
