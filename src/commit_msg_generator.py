@@ -70,7 +70,9 @@ def make_api_request(config: Config, messages: list[dict], token: str) -> dict:
     # # Print as curl command for debugging purposes
     # curl_line = f"""curl -X POST "{url}" -H "Authorization : Bearer {token}" -H "Content-Type: application/json" -d '{data}'"""
     # print(curl_line)
-    response = requests.post(url, headers=headers, data=json.dumps(data), timeout=config["timeout"])
+    response = requests.post(
+        url, headers=headers, data=json.dumps(data), timeout=config["timeout"]
+    )
     response.raise_for_status()
     return response.json()
 
