@@ -94,8 +94,8 @@ def commit_full_text_message(repo_path: str, message: str) -> str:
         committer = Actor(author, author_email)
 
         return repo.index.commit(message=message, committer=committer).hexsha
-    except Exception as e:  # pylint: disable=broad-except
-        logger.error("Failed to commit the message. Details: %s", e)
+    except Exception as exception_detail:  # pylint: disable=broad-except
+        logger.error("Failed to commit the message. Details: %s", exception_detail)
         sys.exit(1)
 
 
