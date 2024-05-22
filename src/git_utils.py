@@ -75,7 +75,8 @@ def check_git_config(repo: Repo):
     if not os.path.exists(ssh_key_path):
         logger.warning("SSH key not found.")
         print(
-            "Please generate one using the following command and add it to your SSH agent and GitHub account:"
+            "Please generate one using the following command and add it to "
+            + "your SSH agent and GitHub account:"
         )
         print("  ssh-keygen -t rsa -b 4096 -C 'your.email@example.com'")
 
@@ -98,7 +99,6 @@ def commit_full_text_message(repo_path: str, message: str) -> str:
         sys.exit(1)
 
 
-# get git core editor, if not set, use vim
 def get_git_editor() -> str:
     """
     Get the configured git editor or use 'vim' as the default.

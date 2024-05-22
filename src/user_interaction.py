@@ -2,7 +2,6 @@
 General utility functions for user interaction.
 """
 
-import os
 import tempfile
 import subprocess
 from .git_utils import get_git_editor
