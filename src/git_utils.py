@@ -96,3 +96,17 @@ def commit_full_text_message(repo_path: str, message: str) -> str:
     except Exception as e:
         logger.error(f"Failed to commit the message. Details: {e}")
         sys.exit(1)
+
+
+# get git core editor, if not set, use vim
+def get_git_editor() -> str:
+    """
+    Get the configured git editor or use 'vim' as the default.
+    """
+    editor = os.getenv("GIT_EDITOR", os.getenv("EDITOR"))
+    if editor is None:
+        if sys.platform.startswith("win"):
+            editor = "notepad.exe"
+        else:
+            editor = "vim"
+    return editor
