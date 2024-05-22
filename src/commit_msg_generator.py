@@ -7,8 +7,8 @@ This module provides functionality for generating commit messages using the Open
 from random import shuffle
 from typing import Generator
 import re
-import requests
 import json
+import requests
 
 from .config_parser import Config
 from .git_diff import git_diff
@@ -23,6 +23,7 @@ class TokenManager:
 
     @classmethod
     def get_instance(cls, tokens: list[str]):
+        """Return the singleton instance."""
         if cls._instance is None:
             cls._instance = cls(tokens)
         return cls._instance
@@ -35,6 +36,7 @@ class TokenManager:
         shuffle(self._access_pool)
 
     def pop_token(self):
+        """Return a token from the pool."""
         if not self._access_pool:
             self._access_pool = list(self._constant_pool)
             shuffle(self._access_pool)
@@ -68,7 +70,10 @@ def make_api_request(config: Config, messages: list[dict], token: str) -> dict:
         "presence_penalty": config["presence_penalty"],
     }
     # # Print as curl command for debugging purposes
-    # curl_line = f"""curl -X POST "{url}" -H "Authorization : Bearer {token}" -H "Content-Type: application/json" -d "{json.dumps(data)}" """
+    # curl_line = f"""curl -X POST "{url}" \
+    # -H "Authorization : Bearer {token}" \
+    # -H "Content-Type: application/json" \
+    # -d "{json.dumps(data)}" """
     # print(curl_line)
     response = requests.post(
         url, headers=headers, data=json.dumps(data), timeout=config["timeout"]

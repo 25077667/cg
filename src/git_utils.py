@@ -64,7 +64,7 @@ def check_git_config(repo: Repo):
         missing_configs.append("user.email")
 
     if missing_configs:
-        logger.warning(f"Missing Git configuration: {', '.join(missing_configs)}")
+        logger.warning("Missing Git configuration: %s", ", ".join(missing_configs))
         print("Please set them using the following commands:")
         if "user.name" in missing_configs:
             print("  git config --global user.name 'Your Name'")
@@ -94,8 +94,8 @@ def commit_full_text_message(repo_path: str, message: str) -> str:
         committer = Actor(author, author_email)
 
         return repo.index.commit(message=message, committer=committer).hexsha
-    except Exception as e:
-        logger.error(f"Failed to commit the message. Details: {e}")
+    except Exception as e:  # pylint: disable=broad-except
+        logger.error("Failed to commit the message. Details: %s", e)
         sys.exit(1)
 
 
