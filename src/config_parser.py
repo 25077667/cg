@@ -32,7 +32,7 @@ Write git commit message following these rules:
     "frequency_penalty": 1.6,
     "presence_penalty": 0.1,
     "revise": {
-        "model": "gpt-3.5-turbo",
+        "model": "gpt-4o-mini",
         "threshold": 6.5,
         "max_tokens": 128,
         "temperature": 1,
